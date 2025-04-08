@@ -1,0 +1,15 @@
+flask
+werkzeug
+langchain
+langchain-google-genai
+langchain-community
+sentence-transformers
+google-generativeai
+pypdf
+docx2txt
+unstructured
+html2text
+chromadb
+pydantic
+python-dotenv
+dotenv
