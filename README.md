@@ -15,7 +15,7 @@ Ce projet implémente un chatbot intelligent basé sur l'architecture RAG (Retri
 ## Structure du projet
 
 ```
-baobab-chatbot/
+banque-soleil/
 │
 ├── app.py                  # Application Flask principale
 ├── ingestion.py            # Script d'ingestion des documents
@@ -48,8 +48,8 @@ baobab-chatbot/
 
 1. Cloner le dépôt :
    ```bash
-   git clone https://github.com/votre-username/baobab-chatbot.git
-   cd baobab-chatbot
+   git clone https://github.com/tokosel/soleilbanquebot.git
+   cd soleilbanquebot
    ```
 
 2. Créer un environnement virtuel :
