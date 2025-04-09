@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, jsonify
-import threading
 import os
+from werkzeug.utils import secure_filename
+import threading
 
 # Imports locaux
-from config import FLASK_SECRET_KEY, FLASK_DEBUG, FLASK_HOST, FLASK_PORT
+from config import FLASK_SECRET_KEY, FLASK_DEBUG, FLASK_HOST, FLASK_PORT, DOCUMENTS_DIR
 from utils import logger, validate_query, sanitize_input, format_response, error_response
 from rag_engine import get_rag_engine
+from ingestion import add_document, DocumentIngestion
 
 # Initialisation de l'application Flask
 app = Flask(__name__)
@@ -16,7 +18,6 @@ rag_engine = None
 rag_engine_lock = threading.Lock()
 
 def get_or_initialize_rag():
-    """Récupère ou initialise le moteur RAG de manière thread-safe"""
     global rag_engine
     with rag_engine_lock:
         if rag_engine is None:
@@ -26,12 +27,10 @@ def get_or_initialize_rag():
 
 @app.route('/')
 def index():
-    """Page principale du chatbot"""
     return render_template('index.html')
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    """Endpoint pour poser une question au chatbot"""
     try:
         data = request.json
         if not data or 'query' not in data:
@@ -46,7 +45,7 @@ def chat():
             return jsonify(error_response("Système non disponible, veuillez réessayer plus tard")), 503
 
         response = engine.ask(query)
-        return jsonify(format_response(response))
+        return jsonify({"answer": response})
 
     except Exception as e:
         logger.error(f"Erreur lors du traitement de la requête: {str(e)}")
@@ -54,7 +53,6 @@ def chat():
 
 @app.route('/api/status')
 def status():
-    """Endpoint pour vérifier le statut du chatbot"""
     engine = get_or_initialize_rag()
     return jsonify({
         "status": "online" if engine is not None else "initializing",
@@ -62,4 +60,5 @@ def status():
     })
 
 if __name__ == '__main__':
+    os.makedirs(DOCUMENTS_DIR, exist_ok=True)
     app.run(host=FLASK_HOST, port=FLASK_PORT, debug=FLASK_DEBUG)

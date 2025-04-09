@@ -43,8 +43,10 @@
 
       try {
         const response = await axios.post('/api/chat', { query });
-        if (response.data && response.data.response) {
-          addMessage(response.data.response, 'bot');
+
+        // ✅ Correction ici : on lit 'answer' au lieu de 'response'
+        if (response.data && response.data.answer) {
+          addMessage(response.data.answer, 'bot');
         } else {
           addMessage("❌ Erreur: Réponse inattendue du serveur.", 'bot');
         }

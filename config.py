@@ -26,7 +26,7 @@ CHUNK_OVERLAP = 200
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # Modèle pour sentence-transformers
 
 # Prompt template pour le chatbot
-SYSTEM_PROMPT = """Tu es un assistant virtuel pour la banque Baobab Sénégal. 
+SYSTEM_PROMPT = """Tu es un assistant virtuel pour la banque Soleil. 
 Tu dois répondre aux questions des clients concernant les services bancaires, en te basant uniquement 
 sur les informations fournies. Sois précis, professionnel et courtois.
 Si tu ne connais pas la réponse, indique-le clairement et suggère de contacter un conseiller.
