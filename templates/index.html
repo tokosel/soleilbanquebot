@@ -2,58 +2,174 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Soleil Chatbot</title>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .chat-message {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      max-width: 85%;
+    }
+    .user-message {
+      background-color: #e9f5ff;
+      margin-left: auto;
+      text-align: right;
+    }
+    .bot-message {
+      background-color: #f0f0f0;
+      margin-right: auto;
+      text-align: left;
+    }
+    .pre-line {
+      white-space: pre-line;
+    }
+  </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
   <div class="bg-white shadow-lg rounded-2xl w-full max-w-3xl p-6 space-y-6">
     <h1 class="text-2xl font-bold text-center text-gray-800">🤖 Soleil Chatbot</h1>
+    
+    <div class="text-sm text-gray-600 text-center">
+      Contexte : Vous discutez avec l'assistant virtuel de la Banque Soleil.<br>
+      Posez vos questions concernant les services bancaires (compte, produits, services digitaux, etc.).
+    </div>
 
     <div id="chat-box" class="h-96 overflow-y-auto border border-gray-300 rounded p-4 bg-gray-50 text-sm space-y-4">
-      <!-- Messages du chatbot -->
+      <!-- Les messages du chatbot apparaîtront ici -->
+      <div class="chat-message bot-message text-blue-700">
+        Bonjour, je suis l'assistant virtuel de la Banque Soleil. Comment puis-je vous aider aujourd'hui?
+      </div>
     </div>
 
     <form id="chat-form" class="flex space-x-2">
       <input type="text" id="user-input" class="flex-grow p-2 border border-gray-300 rounded" placeholder="Posez votre question..." required>
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Envoyer</button>
+      <button type="submit" id="submit-btn" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Envoyer</button>
     </form>
+    
+    <div id="status-indicator" class="text-xs text-center text-gray-500">
+      Connexion au système...
+    </div>
   </div>
 
   <script>
     const chatBox = document.getElementById('chat-box');
     const chatForm = document.getElementById('chat-form');
     const userInput = document.getElementById('user-input');
+    const submitBtn = document.getElementById('submit-btn');
+    const statusIndicator = document.getElementById('status-indicator');
 
+    // Vérification du statut du système
+    async function checkStatus() {
+      try {
+        const response = await axios.get('/api/status');
+        if (response.data && response.data.ready) {
+          statusIndicator.textContent = 'Système prêt';
+          statusIndicator.className = 'text-xs text-center text-green-600';
+          submitBtn.disabled = false;
+        } else {
+          statusIndicator.textContent = 'Initialisation du système en cours...';
+          statusIndicator.className = 'text-xs text-center text-yellow-600';
+          submitBtn.disabled = true;
+          setTimeout(checkStatus, 2000);
+        }
+      } catch (error) {
+        statusIndicator.textContent = 'Erreur de connexion au système';
+        statusIndicator.className = 'text-xs text-center text-red-600';
+        submitBtn.disabled = true;
+        setTimeout(checkStatus, 5000);
+      }
+    }
+
+    // Fonction pour échapper les caractères HTML
+    function escapeHTML(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Fonction pour ajouter un message dans le chat
     function addMessage(text, sender = 'user') {
       const message = document.createElement('div');
-      message.className = sender === 'user' ? 'text-right' : 'text-left text-blue-700';
-      message.textContent = text;
+      message.className = sender === 'user' 
+        ? 'chat-message user-message' 
+        : 'chat-message bot-message text-blue-700 pre-line';
+      
+      // Échapper les caractères HTML pour éviter les injections XSS
+      const safeText = escapeHTML(text);
+      
+      // Créer le contenu avec le texte sécurisé
+      message.innerHTML = safeText;
+      
       chatBox.appendChild(message);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
+    // Fonction pour afficher un indicateur de chargement
+    function showLoadingIndicator() {
+      const loadingIndicator = document.createElement('div');
+      loadingIndicator.id = 'loading-indicator';
+      loadingIndicator.className = 'chat-message bot-message text-gray-500';
+      loadingIndicator.textContent = 'En train de réfléchir...';
+      chatBox.appendChild(loadingIndicator);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Fonction pour supprimer l'indicateur de chargement
+    function removeLoadingIndicator() {
+      const loadingIndicator = document.getElementById('loading-indicator');
+      if (loadingIndicator) {
+        loadingIndicator.remove();
+      }
+    }
+
+    // Soumission du formulaire
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const query = userInput.value.trim();
       if (!query) return;
 
+      // Désactiver le bouton pendant le traitement
+      submitBtn.disabled = true;
+      
       addMessage(query, 'user');
       userInput.value = '';
+      
+      showLoadingIndicator();
 
       try {
         const response = await axios.post('/api/chat', { query });
+        removeLoadingIndicator();
         
-        if (response.data && response.data.answer) {
+        console.log("Réponse reçue:", response.data);
+        
+        if (response.data && typeof response.data.answer === 'string') {
           addMessage(response.data.answer, 'bot');
         } else {
+          console.error("Format de réponse inattendu:", response.data);
           addMessage("❌ Erreur: Réponse inattendue du serveur.", 'bot');
         }
       } catch (error) {
-        console.error(error);
+        removeLoadingIndicator();
+        console.error("Erreur axios:", error);
+        if (error.response) {
+          console.error("Détails de l'erreur:", error.response.data);
+        }
         addMessage("❌ Erreur lors de la communication avec le chatbot.", 'bot');
       }
+      
+      // Réactiver le bouton
+      submitBtn.disabled = false;
+      userInput.focus();
     });
+
+    // Initialisation
+    checkStatus();
   </script>
 </body>
 </html>

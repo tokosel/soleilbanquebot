@@ -5,9 +5,7 @@ import shutil
 # LangChain imports (versions compatibles)
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
-from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 # Imports locaux
@@ -67,7 +65,8 @@ class RAGEngine:
                 max_output_tokens=2048,
             )
 
-            template = ChatPromptTemplate.from_messages([
+            # Création du template de prompt avec messages
+            self.template = ChatPromptTemplate.from_messages([
                 ("system", SYSTEM_PROMPT),
                 ("human",
                  """Contexte: {context}
@@ -79,13 +78,6 @@ class RAGEngine:
                  et suggère de contacter un conseiller Soleil.""")
             ])
 
-            self.chain = (
-                {"context": self.retriever, "question": RunnablePassthrough()}
-                | template
-                | self.llm
-                | StrOutputParser()
-            )
-
             logger.info("✅ Moteur RAG initialisé avec succès")
 
         except Exception as e:
@@ -95,12 +87,36 @@ class RAGEngine:
     def ask(self, query: str) -> str:
         try:
             logger.info(f"🔍 Question posée: {query}")
-            result = self.chain.invoke(query)
+
+            # Utiliser invoke() au lieu de get_relevant_documents()
+            docs = self.retriever.invoke(query)
+            context = " ".join([doc.page_content for doc in docs]) if docs else ""
+
+            # Utilisation de format_messages pour obtenir une liste structurée de messages
+            messages = self.template.format_messages(context=context, question=query)
+            
+            # Appel direct du LLM via invoke avec les messages structurés
+            response = self.llm.invoke(messages)
+            
+            # Extraction du contenu texte de l'AIMessage
+            if hasattr(response, 'content'):
+                answer = response.content
+            elif isinstance(response, str):
+                answer = response
+            else:
+                # Fallback pour d'autres types de réponses
+                answer = str(response)
+                
+            # Log pour déboguer le type et contenu de la réponse
+            logger.info(f"Type de réponse: {type(answer)}")
+            logger.debug(f"Contenu de la réponse: {answer[:50]}...")
+
             logger.info("✅ Réponse générée avec succès")
-            return result
+            return answer
+
         except Exception as e:
             logger.error(f"Erreur génération réponse: {e}")
-            raise
+            return f"Une erreur est survenue lors du traitement de votre demande: {str(e)}"
 
 
 def get_rag_engine(reset_db=False) -> Optional[RAGEngine]:
