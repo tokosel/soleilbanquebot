@@ -76,7 +76,7 @@ class RAGEngine:
 
                  Réponds uniquement avec les informations fournies dans le contexte.
                  Si tu ne trouves pas l'information, dis simplement que tu ne sais pas 
-                 et suggère de contacter un conseiller Baobab.""")
+                 et suggère de contacter un conseiller Soleil.""")
             ])
 
             self.chain = (

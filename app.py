@@ -7,7 +7,6 @@ import threading
 from config import FLASK_SECRET_KEY, FLASK_DEBUG, FLASK_HOST, FLASK_PORT, DOCUMENTS_DIR
 from utils import logger, validate_query, sanitize_input, format_response, error_response
 from rag_engine import get_rag_engine
-from ingestion import add_document, DocumentIngestion
 
 # Initialisation de l'application Flask
 app = Flask(__name__)

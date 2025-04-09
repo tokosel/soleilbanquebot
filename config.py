@@ -9,7 +9,7 @@ DOCUMENTS_DIR = os.path.join(DATA_DIR, "documents")
 VECTOR_DB_DIR = os.path.join(DATA_DIR, "vector_db")
 
 # Configuration de l'application Flask
-FLASK_SECRET_KEY = "baobab-chatbot-secret-key-change-in-production"
+FLASK_SECRET_KEY = "soleil-chatbot-secret-key-change-in-production"
 FLASK_DEBUG = True
 FLASK_HOST = "127.0.0.1"
 FLASK_PORT = 5000

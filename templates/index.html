@@ -2,13 +2,13 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Baobab Chatbot</title>
+  <title>Soleil Chatbot</title>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
   <div class="bg-white shadow-lg rounded-2xl w-full max-w-3xl p-6 space-y-6">
-    <h1 class="text-2xl font-bold text-center text-gray-800">🤖 Baobab Chatbot</h1>
+    <h1 class="text-2xl font-bold text-center text-gray-800">🤖 Soleil Chatbot</h1>
 
     <div id="chat-box" class="h-96 overflow-y-auto border border-gray-300 rounded p-4 bg-gray-50 text-sm space-y-4">
       <!-- Messages du chatbot -->
@@ -43,8 +43,7 @@
 
       try {
         const response = await axios.post('/api/chat', { query });
-
-        // ✅ Correction ici : on lit 'answer' au lieu de 'response'
+        
         if (response.data && response.data.answer) {
           addMessage(response.data.answer, 'bot');
         } else {
