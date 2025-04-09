@@ -1,6 +1,6 @@
-# Chatbot RAG pour Baobab Sénégal
+# Chatbot RAG pour Soleil Banque :)
 
-Ce projet implémente un chatbot intelligent basé sur l'architecture RAG (Retrieval-Augmented Generation) pour la banque Baobab Sénégal. Il permet aux clients d'obtenir des réponses précises à leurs questions concernant les services bancaires.
+Ce projet implémente un chatbot intelligent basé sur l'architecture RAG (Retrieval-Augmented Generation) pour la banque Soleil du Sénégal. Il permet aux clients d'obtenir des réponses précises à leurs questions concernant les services bancaires.
 
 ## Fonctionnalités
 
