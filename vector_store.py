@@ -20,7 +20,7 @@ class VectorStore:
             self.collection = self.client.create_collection("soleil_bank_bot")
             print("[VectorStore] Collection 'soleil_bank_bot' créée.")
 
-    def search(self, query, k=3):
+    def search(self, query, k=10):
         """Recherche les documents les plus pertinents pour la requête."""
         results = self.collection.query(query_texts=[query], n_results=k)
         # Retourne le premier résultat (en supposant que results["documents"] est une liste de listes)
