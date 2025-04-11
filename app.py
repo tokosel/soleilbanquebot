@@ -1,30 +1,29 @@
 from flask import Flask, render_template, request, jsonify
 import os
 import threading
-import json
 
 # Imports locaux
-from config import FLASK_SECRET_KEY, FLASK_DEBUG, FLASK_HOST, FLASK_PORT, DOCUMENTS_DIR
+from retriever import Retriever
+from model_config import Model
 from utils import logger, validate_query, sanitize_input, error_response
-from rag_engine import get_rag_engine
 
 app = Flask(__name__)
-app.secret_key = FLASK_SECRET_KEY
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "soleil_bank_default_key")
 
 # Configuration Flask pour gérer les caractères spéciaux
 app.config['JSON_AS_ASCII'] = False
 
-# Singleton pour le moteur RAG
-rag_engine = None
-rag_engine_lock = threading.Lock()
+# Singleton pour le retriever
+retriever = None
+retriever_lock = threading.Lock()
 
-def get_or_initialize_rag():
-    global rag_engine
-    with rag_engine_lock:
-        if rag_engine is None:
-            logger.info("Initialisation du moteur RAG")
-            rag_engine = get_rag_engine()
-    return rag_engine
+def get_or_initialize_retriever():
+    global retriever
+    with retriever_lock:
+        if retriever is None:
+            logger.info("Initialisation du système de récupération de documents")
+            retriever = Retriever()
+    return retriever
 
 @app.route('/')
 def index():
@@ -41,27 +40,17 @@ def chat():
         if not validate_query(query):
             return jsonify(error_response("Question trop courte ou invalide")), 400
         
-        engine = get_or_initialize_rag()
-        if engine is None:
+        # Récupération du retriever
+        r = get_or_initialize_retriever()
+        if r is None:
             return jsonify(error_response("Système non disponible, veuillez réessayer plus tard")), 503
         
-        # Récupération de la réponse sous forme de chaîne
-        response = engine.ask(query)
+        # Récupération des documents pertinents
+        documents = r.retrieve_documents(query)
+        context = "\n".join(documents) if documents else ""
         
-        # Vérification que la réponse est bien une chaîne de caractères
-        if not isinstance(response, str):
-            response = str(response)
-            
-        # Log de débogage pour voir la réponse avant de l'envoyer
-        logger.debug(f"Réponse avant envoi (50 premiers caractères): {response[:50]}...")
-        
-        # Test de sérialisation pour détecter les problèmes potentiels
-        try:
-            test_json = json.dumps({"answer": response})
-            logger.debug("Sérialisation JSON réussie")
-        except Exception as json_error:
-            logger.error(f"Erreur de sérialisation JSON: {str(json_error)}")
-            response = "Erreur de formatage dans la réponse. Veuillez reformuler votre question."
+        # Génération de la réponse
+        response = Model.generate_response(context, query)
         
         return jsonify({"answer": response})
     
@@ -71,12 +60,19 @@ def chat():
 
 @app.route('/api/status')
 def status():
-    engine = get_or_initialize_rag()
+    r = get_or_initialize_retriever()
     return jsonify({
-        "status": "online" if engine is not None else "initializing",
-        "ready": engine is not None
+        "status": "online" if r is not None else "initializing",
+        "ready": r is not None
     })
 
 if __name__ == '__main__':
-    os.makedirs(DOCUMENTS_DIR, exist_ok=True)
+    # Définition des variables d'environnement par défaut si non spécifiées
+    FLASK_HOST = os.getenv("FLASK_HOST", "0.0.0.0")
+    FLASK_PORT = int(os.getenv("FLASK_PORT", 5000))
+    FLASK_DEBUG = os.getenv("FLASK_DEBUG", "False").lower() == "true"
+    # Message de démarrage
+    logger.info(f"Démarrage de l'application Soleil Chatbot sur {FLASK_HOST}:{FLASK_PORT}, mode debug: {FLASK_DEBUG}")
+    
+    # Lancement de l'application
     app.run(host=FLASK_HOST, port=FLASK_PORT, debug=FLASK_DEBUG)

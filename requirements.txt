@@ -13,3 +13,6 @@ chromadb
 pydantic
 python-dotenv
 dotenv
+PyPDF2
+tiktoken
+PyYAML
