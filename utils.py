@@ -8,7 +8,7 @@ def setup_logger():
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    return logging.getLogger('baobab_chatbot')
+    return logging.getLogger('soleil-chatbot')
 
 logger = setup_logger()
 

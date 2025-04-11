@@ -23,7 +23,7 @@ CHROMA_PERSIST_DIRECTORY = VECTOR_DB_DIR
 # Configuration RAG
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"  # Modèle pour sentence-transformers
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 
 # Prompt template pour le chatbot
 SYSTEM_PROMPT = """Tu es un assistant virtuel pour la banque Soleil. 
