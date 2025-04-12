@@ -24,7 +24,10 @@ class Model:
 
                     Utilise uniquement les informations suivantes pour répondre à la question du client.
                     Si tu ne trouves pas l'information dans les passages fournis, indique poliment que 
-                    tu ne disposes pas de cette information et suggère de contacter un conseiller Soleil.
+                    tu ne disposes pas de cette information et suggère de contacter un la Banque Soleil
+                    Tél : (+221) 33 839 55 00
+                    Email : contact@banquesoleil.sn
+                    Site web : www.banquesoleil.sn.
 
         Contexte : {context}
 

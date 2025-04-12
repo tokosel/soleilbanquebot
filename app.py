@@ -41,13 +41,15 @@ def chat():
             return jsonify(error_response("Question trop courte ou invalide")), 400
         
         # Récupération du retriever
-        r = get_or_initialize_retriever()
-        if r is None:
-            return jsonify(error_response("Système non disponible, veuillez réessayer plus tard")), 503
-        
+        retriever = Retriever(db_path="data/vector_store/chroma_db")
         # Récupération des documents pertinents
-        documents = r.retrieve_documents(query)
-        context = "\n".join(documents) if documents else ""
+        documents = retriever.retrieve_documents(query)
+        # Aplatir la liste de documents si nécessaire
+        if isinstance(documents, list):
+            # Si des sous-listes existent, les aplatir
+            documents = [item for sublist in documents for item in (sublist if isinstance(sublist, list) else [sublist])]
+        
+        context = "\n".join(documents)
         
         # Génération de la réponse
         response = Model.generate_response(context, query)
