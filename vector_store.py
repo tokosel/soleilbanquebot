@@ -12,13 +12,13 @@ class VectorStore:
         # Initialisation du client ChromaDB
         self.client = chromadb.PersistentClient(path=db_path)
         
-        # Récupération ou création de la collection "soleil_bank_bot"
+        # Récupération ou création de la collection "soleil-banque"
         try:
-            self.collection = self.client.get_collection("soleil_bank_bot")
+            self.collection = self.client.get_collection("soleil-banque")
         except NotFoundError:
             # La collection n'existe pas encore, la créer
-            self.collection = self.client.create_collection("soleil_bank_bot")
-            print("[VectorStore] Collection 'soleil_bank_bot' créée.")
+            self.collection = self.client.create_collection("soleil-banque")
+            print("[VectorStore] Collection 'soleil-banque' créée.")
 
     def search(self, query, k=10):
         """Recherche les documents les plus pertinents pour la requête."""

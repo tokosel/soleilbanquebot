@@ -5,7 +5,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-logger = logging.getLogger('soleil_bank_bot')
+logger = logging.getLogger('soleil-banque')
 
 def validate_query(query):
     """Valide que la requête est suffisamment longue et non vide."""
